@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Start Chat</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="chat">
+    <h2>Start a Private Chat</h2>
+    <button onclick="startChat()">Generate Link</button>
+    <p id="linkOutput"></p>
+  </div>
+  <script>
+    function startChat() {
+      const id = Math.random().toString(36).substring(2, 8);
+      const link = `${location.origin}/room/${id}`;
+      document.getElementById('linkOutput').innerHTML = `
+        Share this link: <br><a href="${link}" target="_blank">${link}</a>
+      `;
+    }
+  </script>
+</body>
+</html>
