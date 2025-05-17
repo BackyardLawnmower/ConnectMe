@@ -1,21 +1,38 @@
-const express = require("express");
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
+
 const app = express();
-const http = require("http").createServer(app);
-const io = require("socket.io")(http);
+const server = http.createServer(app);
+const io = new Server(server);
 
-app.use(express.static("public"));
+app.use(express.static('public'));
 
-io.on("connection", socket => {
-  socket.on("chat message", msg => {
-    socket.broadcast.emit("chat message", msg);
-  });
+app.get('/room/:id', (req, res) => {
+  res.sendFile(__dirname + '/public/chat.html');
+});
 
-  socket.on("voice message", msg => {
-    socket.broadcast.emit("voice message", msg);
+io.on('connection', socket => {
+  socket.on('join', roomID => {
+    const clients = io.sockets.adapter.rooms.get(roomID) || new Set();
+    if (clients.size >= 2) {
+      socket.emit('room-full');
+      return;
+    }
+
+    socket.join(roomID);
+    socket.to(roomID).emit('new-user');
+
+    socket.on('signal', data => {
+      socket.to(roomID).emit('signal', data);
+    });
+
+    socket.on('disconnect', () => {
+      socket.to(roomID).emit('user-left');
+    });
   });
 });
 
 const PORT = process.env.PORT || 3000;
-http.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+server.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+

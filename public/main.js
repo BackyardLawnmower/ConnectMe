@@ -52,4 +52,3 @@ socket.on('room-full', () => {
   alert('Room is full, cannot join.');
   window.location.href = '/';
 });
-
